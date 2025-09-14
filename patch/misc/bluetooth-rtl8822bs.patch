@@ -1,0 +1,100 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Bulat Shakirzyanov <bulateek@gmail.com>
+Date: Fri, 12 Sep 2025 14:56:16 +0300
+Subject: [PATCH] Bluetooth: btrtl: Add support for RTL8822BS
+
+Signed-off-by: Bulat Shakirzyanov <bulateek@gmail.com>
+---
+ Documentation/devicetree/bindings/net/bluetooth/realtek,bluetooth.yaml |  1 +
+ drivers/bluetooth/btrtl.c                                              | 11 ++++++++++
+ drivers/bluetooth/hci_h5.c                                             |  6 +++++
+ 3 files changed, 18 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/net/bluetooth/realtek,bluetooth.yaml b/Documentation/devicetree/bindings/net/bluetooth/realtek,bluetooth.yaml
+index 7d567122bac9..b2bc9b631217 100644
+--- a/Documentation/devicetree/bindings/net/bluetooth/realtek,bluetooth.yaml
++++ b/Documentation/devicetree/bindings/net/bluetooth/realtek,bluetooth.yaml
+@@ -22,10 +22,11 @@ properties:
+       - enum:
+           - realtek,rtl8723bs-bt
+           - realtek,rtl8723cs-bt
+           - realtek,rtl8723ds-bt
+           - realtek,rtl8822cs-bt
++          - realtek,rtl8822bs-bt
+       - items:
+           - enum:
+               - realtek,rtl8821cs-bt
+           - const: realtek,rtl8723bs-bt
+ 
+diff --git a/drivers/bluetooth/btrtl.c b/drivers/bluetooth/btrtl.c
+index b41391de5a8d..325e6c41c6e2 100644
+--- a/drivers/bluetooth/btrtl.c
++++ b/drivers/bluetooth/btrtl.c
+@@ -275,10 +275,19 @@ static const struct id_table ic_id_table[] = {
+ 	  .has_rom_version = true,
+ 	  .has_msft_ext = true,
+ 	  .fw_name  = "rtl_bt/rtl8822b_fw",
+ 	  .cfg_name = "rtl_bt/rtl8822b_config",
+ 	  .hw_info  = "rtl8822bu" },
++	
++	/* 8822B with UART interface */
++	{ IC_INFO(RTL_ROM_LMP_8822B, 0xb, 0x7, HCI_UART),
++          .config_needed = true,
++          .has_rom_version = true,
++          .has_msft_ext = true,
++          .fw_name  = "rtl_bt/rtl8822bs_fw",
++          .cfg_name = "rtl_bt/rtl8822bs_config",
++          .hw_info  = "rtl8822bs" },
+ 
+ 	/* 8852A */
+ 	{ IC_INFO(RTL_ROM_LMP_8852A, 0xa, 0xb, HCI_USB),
+ 	  .config_needed = false,
+ 	  .has_rom_version = true,
+@@ -1326,10 +1335,12 @@ void btrtl_set_quirks(struct hci_dev *hdev, struct btrtl_device_info *btrtl_dev)
+ 		    btrtl_dev->project_id == CHIP_ID_8852C)
+ 			set_bit(HCI_QUIRK_USE_MSFT_EXT_ADDRESS_FILTER, &hdev->quirks);
+ 
+ 		hci_set_aosp_capable(hdev);
+ 		break;
++	case CHIP_ID_8822B:
++		set_bit(HCI_QUIRK_BROKEN_LOCAL_EXT_FEATURES_PAGE_2, &hdev->quirks);
+ 	default:
+ 		rtl_dev_dbg(hdev, "Central-peripheral role not enabled.");
+ 		rtl_dev_dbg(hdev, "WBS supported not enabled.");
+ 		break;
+ 	}
+diff --git a/drivers/bluetooth/hci_h5.c b/drivers/bluetooth/hci_h5.c
+index 6229d80467b4..ca4aa7368718 100644
+--- a/drivers/bluetooth/hci_h5.c
++++ b/drivers/bluetooth/hci_h5.c
+@@ -1073,10 +1073,14 @@ static struct h5_vnd rtl_vnd = {
+ 	.resume		= h5_btrtl_resume,
+ 	.acpi_gpio_map	= acpi_btrtl_gpios,
+ 	.sizeof_priv    = sizeof(struct btrealtek_data),
+ };
+ 
++static const struct h5_device_data h5_data_rtl8822bs = {
++	.vnd = &rtl_vnd,
++};
++
+ static const struct h5_device_data h5_data_rtl8822cs = {
+ 	.vnd = &rtl_vnd,
+ };
+ 
+ static const struct h5_device_data h5_data_rtl8723bs = {
+@@ -1101,10 +1105,12 @@ static const struct dev_pm_ops h5_serdev_pm_ops = {
+ 	SET_RUNTIME_PM_OPS(h5_serdev_suspend, h5_serdev_resume, NULL)
+ };
+ 
+ static const struct of_device_id rtl_bluetooth_of_match[] = {
+ #ifdef CONFIG_BT_HCIUART_RTL
++        { .compatible = "realtek,rtl8822bs-bt",
++          .data = (const void *)&h5_data_rtl8822bs },
+ 	{ .compatible = "realtek,rtl8822cs-bt",
+ 	  .data = (const void *)&h5_data_rtl8822cs },
+ 	{ .compatible = "realtek,rtl8723bs-bt",
+ 	  .data = (const void *)&h5_data_rtl8723bs },
+ 	{ .compatible = "realtek,rtl8723cs-bt",
+-- 
+Created with Armbian build tools https://github.com/armbian/build
+

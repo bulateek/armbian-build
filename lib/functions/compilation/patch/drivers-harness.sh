@@ -115,6 +115,7 @@ function kernel_drivers_prepare_harness() {
 		driver_rtl8852bs
 		driver_rtl88x2cs
 		driver_rtl8822cs_bt
+		driver_rtl8822bs_bt
 		driver_rtl8723DS
 		driver_rtl8723DU
 		driver_uwe5622

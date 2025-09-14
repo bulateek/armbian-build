@@ -780,6 +780,19 @@ driver_rtl8822cs_bt() {
 	fi
 }
 
+#bt for rtl8822bs
+driver_rtl8822bs_bt() {
+
+        # Bluetooth support for Realtek 8822BS chipsets
+        if linux-version compare "${version}" ge 6.12; then
+
+                display_alert "Adding" "Bluetooth support for Realtek 8822BS chipsets" "info"
+
+                process_patch_file "${SRC}/patch/misc/bluetooth-rtl8822bs.patch" "applying"
+
+        fi
+}
+
 driver_rtl8188EU_rtl8188ETV() {
 
 	# Wireless drivers for Realtek 8188EU 8188EUS and 8188ETV chipsets
