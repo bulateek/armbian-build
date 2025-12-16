@@ -1,5 +1,6 @@
 # Rockchip RK3568 quad core 2GB-8GB RAM SoC 2 x GBE eMMC USB3 WiFi/BT PCIe SATA NVMe
 BOARD_NAME="9Tripod X3568 v4"
+BOARD_VENDOR="generic"
 BOARDFAMILY="rockchip64"
 BOARD_MAINTAINER="rbqvq"
 KERNEL_TARGET="current,edge"
@@ -9,6 +10,7 @@ BOOT_SOC="rk3568"
 BOOT_LOGO="desktop"
 BOOT_FDT_FILE="rockchip/rk3568-9tripod-x3568-v4.dtb"
 IMAGE_PARTITION_TABLE="gpt"
+MODULES="ledtrig_netdev"
 
 OVERLAY_PREFIX="rk3568-9tripod-x3568-v4"
 
@@ -17,7 +19,7 @@ function post_family_config__9tripod_x3568_v4_use_mainline_uboot() {
 	display_alert "$BOARD" "Using mainline U-Boot for $BOARD / $BRANCH" "info"
 
 	declare -g BOOTCONFIG="9tripod-x3568-v4-rk3568_defconfig"
-	declare -g BOOTSOURCE="https://github.com/u-boot/u-boot.git" # We ❤️ Mainline U-Boot
+	declare -g BOOTSOURCE="https://github.com/u-boot/u-boot.git"
 	declare -g BOOTBRANCH="tag:v2025.10"
 	declare -g BOOTPATCHDIR="v2025.10/board_${BOARD}"
 
